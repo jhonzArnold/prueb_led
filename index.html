@@ -21,36 +21,26 @@
     <button onclick="controlLed(false)" style="background: red; color: white;">Apagar</button>
 
     <script>
-        const esp8266Url = "http://192.168.1.100";  // IP del ESP8266
+        const esp8266Url = "http://172.20.10.6";  // Asegúrate de que esta IP es correcta.
 
-        async function getLedStatus() {
-            try {
-                let response = await fetch(esp8266Url + "/status");
-                let state = await response.text();
-                updateUI(state.trim() === "ON");
-            } catch (error) {
-                console.error("Error obteniendo el estado:", error);
-            }
+        function controlLed(turnOn) {
+            let url = esp8266Url + (turnOn ? "/on" : "/off");
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    updateUI(xhr.responseText.trim() === "ON");
+                }
+            };
+            xhr.send();
         }
 
         function updateUI(isOn) {
             document.getElementById("ledState").textContent = isOn ? "Encendido" : "Apagado";
             document.getElementById("led").style.color = isOn ? "yellow" : "gray";
         }
-
-        async function controlLed(turnOn) {
-            try {
-                let response = await fetch(esp8266Url + (turnOn ? "/on" : "/off"));
-                let newState = await response.text();
-                updateUI(newState.trim() === "ON");
-            } catch (error) {
-                console.error("Error cambiando estado:", error);
-            }
-        }
-
-        setInterval(getLedStatus, 2000); // Consultar estado cada 2 segundos
-        getLedStatus();
     </script>
 
 </body>
 </html>
+
