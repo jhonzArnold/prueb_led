@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de LED</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        #status { font-size: 20px; margin-top: 20px; }
+        #led { font-size: 100px; color: gray; }
+        button { font-size: 20px; padding: 10px 20px; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Control de LED</h1>
+    <div id="status">Estado: <span id="ledState">Desconocido</span></div>
+    <div id="led">💡</div>
+    <button onclick="toggleLed()">Encender/Apagar</button>
+
+    <script>
+        const esp8266Url = "http://192.168.1.100";  // IP del ESP8266
+
+        async function getLedStatus() {
+            try {
+                let response = await fetch(esp8266Url + "/status");
+                let state = await response.text();
+                updateUI(state.trim() === "ON"); // Elimina espacios en blanco
+            } catch (error) {
+                console.error("Error obteniendo el estado:", error);
+            }
+        }
+
+        function updateUI(isOn) {
+            document.getElementById("ledState").textContent = isOn ? "Encendido" : "Apagado";
+            document.getElementById("led").style.color = isOn ? "yellow" : "gray";
+        }
+
+        async function toggleLed() {
+            try {
+                let response = await fetch(esp8266Url + "/toggle");
+                let newState = await response.text();
+                updateUI(newState.trim() === "ON");
+            } catch (error) {
+                console.error("Error cambiando estado:", error);
+            }
+        }
+
+        setInterval(getLedStatus, 2000); // Consultar estado cada 2 segundos
+        getLedStatus();
+    </script>
+
+</body>
+</html>
