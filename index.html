@@ -8,7 +8,7 @@
         body { text-align: center; font-family: Arial, sans-serif; }
         #status { font-size: 20px; margin-top: 20px; }
         #led { font-size: 100px; color: gray; }
-        button { font-size: 20px; padding: 10px 20px; margin-top: 20px; cursor: pointer; }
+        button { font-size: 20px; padding: 10px 20px; margin: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -16,7 +16,9 @@
     <h1>Control de LED</h1>
     <div id="status">Estado: <span id="ledState">Desconocido</span></div>
     <div id="led">💡</div>
-    <button onclick="toggleLed()">Encender/Apagar</button>
+    <br>
+    <button onclick="controlLed(true)" style="background: green; color: white;">Encender</button>
+    <button onclick="controlLed(false)" style="background: red; color: white;">Apagar</button>
 
     <script>
         const esp8266Url = "http://192.168.1.100";  // IP del ESP8266
@@ -25,7 +27,7 @@
             try {
                 let response = await fetch(esp8266Url + "/status");
                 let state = await response.text();
-                updateUI(state.trim() === "ON"); // Elimina espacios en blanco
+                updateUI(state.trim() === "ON");
             } catch (error) {
                 console.error("Error obteniendo el estado:", error);
             }
@@ -36,9 +38,9 @@
             document.getElementById("led").style.color = isOn ? "yellow" : "gray";
         }
 
-        async function toggleLed() {
+        async function controlLed(turnOn) {
             try {
-                let response = await fetch(esp8266Url + "/toggle");
+                let response = await fetch(esp8266Url + (turnOn ? "/on" : "/off"));
                 let newState = await response.text();
                 updateUI(newState.trim() === "ON");
             } catch (error) {
